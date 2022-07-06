@@ -10,14 +10,30 @@ jobs:
 
   test: 
     runs-on: ubuntu-latest
+  
+    services:
+      
+      postgres:
+        image: postgres12
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: bolu
+          POSTGRES_DB: simple_bank
+        
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - uses: actions/checkout@v3
-
+ 
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.18
-
+    - name: run migrations
+        run: make migrateup
     
     - name: Test
       run: make test
