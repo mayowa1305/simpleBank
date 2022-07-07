@@ -16,8 +16,8 @@ jobs:
       postgres:
         image: postgres12
         env:
-          POSTGRES_USER: ${{root}}
-          POSTGRES_PASSWORD: ${{bolu}}
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: bolu
           POSTGRES_DB: simple_bank
         ports:
           - 5432:5432
