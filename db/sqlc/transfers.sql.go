@@ -11,28 +11,28 @@ import (
 
 const createTransfers = `-- name: CreateTransfers :one
 INSERT INTO "transfers" (
-  "from_account_id",
-  "to_account_id",
+  "from_account_number",
+  "to_account_number",
   "amount"
 ) VALUES (
   $1, $2, $3
 )
-RETURNING id, from_account_id, to_account_id, amount, created_at
+RETURNING id, from_account_number, to_account_number, amount, created_at
 `
 
 type CreateTransfersParams struct {
-	FromAccountID int64 `json:"fromAccountID"`
-	ToAccountID   int64 `json:"toAccountID"`
-	Amount        int64 `json:"amount"`
+	FromAccountNumber int64 `json:"fromAccountNumber"`
+	ToAccountNumber   int64 `json:"toAccountNumber"`
+	Amount            int64 `json:"amount"`
 }
 
 func (q *Queries) CreateTransfers(ctx context.Context, arg CreateTransfersParams) (Transfer, error) {
-	row := q.queryRow(ctx, q.createTransfersStmt, createTransfers, arg.FromAccountID, arg.ToAccountID, arg.Amount)
+	row := q.queryRow(ctx, q.createTransfersStmt, createTransfers, arg.FromAccountNumber, arg.ToAccountNumber, arg.Amount)
 	var i Transfer
 	err := row.Scan(
 		&i.ID,
-		&i.FromAccountID,
-		&i.ToAccountID,
+		&i.FromAccountNumber,
+		&i.ToAccountNumber,
 		&i.Amount,
 		&i.CreatedAt,
 	)
@@ -40,7 +40,7 @@ func (q *Queries) CreateTransfers(ctx context.Context, arg CreateTransfersParams
 }
 
 const getTransfers = `-- name: GetTransfers :one
-SELECT id, from_account_id, to_account_id, amount, created_at FROM "transfers"
+SELECT id, from_account_number, to_account_number, amount, created_at FROM "transfers"
 WHERE "id" = $1 LIMIT 1
 `
 
@@ -49,8 +49,8 @@ func (q *Queries) GetTransfers(ctx context.Context, id int64) (Transfer, error) 
 	var i Transfer
 	err := row.Scan(
 		&i.ID,
-		&i.FromAccountID,
-		&i.ToAccountID,
+		&i.FromAccountNumber,
+		&i.ToAccountNumber,
 		&i.Amount,
 		&i.CreatedAt,
 	)
@@ -58,26 +58,26 @@ func (q *Queries) GetTransfers(ctx context.Context, id int64) (Transfer, error) 
 }
 
 const listTransfers = `-- name: ListTransfers :many
-SELECT id, from_account_id, to_account_id, amount, created_at FROM "transfers"
+SELECT id, from_account_number, to_account_number, amount, created_at FROM "transfers"
 WHERE
- "from_account_id" = $1 or
- "to_account_id" = $2
+ "from_account_number" = $1 or
+ "to_account_number" = $2
 ORDER BY id
 LIMIT $3
 OFFSET $4
 `
 
 type ListTransfersParams struct {
-	FromAccountID int64 `json:"fromAccountID"`
-	ToAccountID   int64 `json:"toAccountID"`
-	Limit         int32 `json:"limit"`
-	Offset        int32 `json:"offset"`
+	FromAccountNumber int64 `json:"fromAccountNumber"`
+	ToAccountNumber   int64 `json:"toAccountNumber"`
+	Limit             int32 `json:"limit"`
+	Offset            int32 `json:"offset"`
 }
 
 func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfer, error) {
 	rows, err := q.query(ctx, q.listTransfersStmt, listTransfers,
-		arg.FromAccountID,
-		arg.ToAccountID,
+		arg.FromAccountNumber,
+		arg.ToAccountNumber,
 		arg.Limit,
 		arg.Offset,
 	)
@@ -90,8 +90,8 @@ func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([
 		var i Transfer
 		if err := rows.Scan(
 			&i.ID,
-			&i.FromAccountID,
-			&i.ToAccountID,
+			&i.FromAccountNumber,
+			&i.ToAccountNumber,
 			&i.Amount,
 			&i.CreatedAt,
 		); err != nil {

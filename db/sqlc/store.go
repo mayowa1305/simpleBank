@@ -42,9 +42,9 @@ func (store *SqlStore) execTX(ctx context.Context, fn func(*Queries) error) erro
 }
 
 type TransferTxParams struct {
-	FromAccountID int64 `json:"from_account_id"`
-	ToAccountID   int64 `json:"to_account_id"`
-	Amount        int64 `json:"amount"`
+	FromAccountNumber int64 `json:"from_account_number"`
+	ToAccountNumber   int64 `json:"to_account_number"`
+	Amount            int64 `json:"amount"`
 }
 
 type TransferTxResult struct {
@@ -62,34 +62,34 @@ func (store *SqlStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 		var err error
 
 		result.Transfer, err = q.CreateTransfers(ctx, CreateTransfersParams{
-			FromAccountID: arg.FromAccountID,
-			ToAccountID:   arg.ToAccountID,
-			Amount:        arg.Amount,
+			FromAccountNumber: arg.FromAccountNumber,
+			ToAccountNumber:   arg.ToAccountNumber,
+			Amount:            arg.Amount,
 		})
 		if err != nil {
 			return err
 		}
 
 		result.FromEntry, err = q.CreateEntries(ctx, CreateEntriesParams{
-			AccountID: arg.FromAccountID,
-			Amount:    -arg.Amount,
+			AccountNumber: arg.FromAccountNumber,
+			Amount:        -arg.Amount,
 		})
 		if err != nil {
 			return err
 		}
 
 		result.ToEntry, err = q.CreateEntries(ctx, CreateEntriesParams{
-			AccountID: arg.ToAccountID,
-			Amount:    arg.Amount,
+			AccountNumber: arg.ToAccountNumber,
+			Amount:        arg.Amount,
 		})
 		if err != nil {
 			return err
 		}
 
-		if arg.FromAccountID > arg.ToAccountID {
-			result.FromAccount, result.ToAccount, _ = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)
+		if arg.FromAccountNumber > arg.ToAccountNumber {
+			result.FromAccount, result.ToAccount, _ = addMoney(ctx, q, arg.FromAccountNumber, -arg.Amount, arg.ToAccountNumber, arg.Amount)
 		} else {
-			result.ToAccount, result.FromAccount, _ = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)
+			result.ToAccount, result.FromAccount, _ = addMoney(ctx, q, arg.ToAccountNumber, arg.Amount, arg.FromAccountNumber, -arg.Amount)
 
 		}
 
@@ -101,22 +101,22 @@ func (store *SqlStore) TransferTx(ctx context.Context, arg TransferTxParams) (Tr
 func addMoney(
 	ctx context.Context,
 	q *Queries,
-	account1ID int64,
+	account1AccountNumber int64,
 	amount1 int64,
-	account2ID int64,
+	account2AccountNumber int64,
 	amount2 int64,
 ) (account1 Account, account2 Account, err error) {
 	account1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
-		ID:     account1ID,
-		Amount: amount1,
+		AccountNumber: account1AccountNumber,
+		Amount:        amount1,
 	})
 	if err != nil {
 		return
 	}
 
 	account2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
-		ID:     account2ID,
-		Amount: amount2,
+		AccountNumber: account2AccountNumber,
+		Amount:        amount2,
 	})
 	if err != nil {
 		return

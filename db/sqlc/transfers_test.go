@@ -11,17 +11,17 @@ import (
 
 func createRandomTranfers(t *testing.T, account1, account2 Account) Transfer {
 	arg := CreateTransfersParams{
-		FromAccountID: account1.ID,
-		ToAccountID:   account2.ID,
-		Amount:        util.RandomMoney(),
+		FromAccountNumber: account1.AccountNumber,
+		ToAccountNumber:   account2.AccountNumber,
+		Amount:            util.RandomMoney(),
 	}
 
 	transfer, err := testQueries.CreateTransfers(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer)
 
-	require.Equal(t, arg.FromAccountID, transfer.FromAccountID)
-	require.Equal(t, arg.ToAccountID, transfer.ToAccountID)
+	require.Equal(t, arg.FromAccountNumber, transfer.FromAccountNumber)
+	require.Equal(t, arg.ToAccountNumber, transfer.ToAccountNumber)
 	require.Equal(t, arg.Amount, transfer.Amount)
 
 	require.NotZero(t, transfer.ID)
@@ -45,8 +45,8 @@ func TestGeTransfers(t *testing.T) {
 	require.NotEmpty(t, transfer2)
 
 	require.Equal(t, transfer1.ID, transfer2.ID)
-	require.Equal(t, transfer1.FromAccountID, transfer2.FromAccountID)
-	require.Equal(t, transfer1.ToAccountID, transfer2.ToAccountID)
+	require.Equal(t, transfer1.FromAccountNumber, transfer2.FromAccountNumber)
+	require.Equal(t, transfer1.ToAccountNumber, transfer2.ToAccountNumber)
 	require.Equal(t, transfer1.Amount, transfer2.Amount)
 	require.WithinDuration(t, transfer1.CreatedAt, transfer2.CreatedAt, time.Second)
 }
@@ -60,10 +60,10 @@ func TestListTransfers(t *testing.T) {
 	}
 
 	arg := ListTransfersParams{
-		FromAccountID: account1.ID,
-		ToAccountID:   account2.ID,
-		Limit:         5,
-		Offset:        0,
+		FromAccountNumber: account1.AccountNumber,
+		ToAccountNumber:   account2.AccountNumber,
+		Limit:             5,
+		Offset:            0,
 	}
 
 	transfers, err := testQueries.ListTransfers(context.Background(), arg)
@@ -72,6 +72,6 @@ func TestListTransfers(t *testing.T) {
 
 	for _, transfer := range transfers {
 		require.NotEmpty(t, transfer)
-		require.True(t, transfer.FromAccountID == account1.ID || transfer.ToAccountID == account1.ID)
+		require.True(t, transfer.FromAccountNumber == account1.AccountNumber || transfer.ToAccountNumber == account1.AccountNumber)
 	}
 }

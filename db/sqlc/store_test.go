@@ -26,9 +26,9 @@ func TestTransferTx(t *testing.T) {
 		go func() {
 			ctx := context.Background()
 			result, err := store.TransferTx(ctx, TransferTxParams{
-				FromAccountID: account1.ID,
-				ToAccountID:   account2.ID,
-				Amount:        amount,
+				FromAccountNumber: account1.AccountNumber,
+				ToAccountNumber:   account2.AccountNumber,
+				Amount:            amount,
 			})
 
 			errs <- err
@@ -48,8 +48,8 @@ func TestTransferTx(t *testing.T) {
 		//check transfer
 		transfer := result.Transfer
 		require.NotEmpty(t, transfer)
-		require.Equal(t, account1.ID, transfer.FromAccountID)
-		require.Equal(t, account2.ID, transfer.ToAccountID)
+		require.Equal(t, account1.AccountNumber, transfer.FromAccountNumber)
+		require.Equal(t, account2.AccountNumber, transfer.ToAccountNumber)
 		require.Equal(t, amount, transfer.Amount)
 		require.NotZero(t, transfer.ID)
 		require.NotZero(t, transfer.CreatedAt)
@@ -60,22 +60,22 @@ func TestTransferTx(t *testing.T) {
 		// check entries
 		fromEntry := result.FromEntry
 		require.NotEmpty(t, fromEntry)
-		require.Equal(t, account1.ID, fromEntry.AccountID)
+		require.Equal(t, account1.AccountNumber, fromEntry.AccountNumber)
 		require.Equal(t, -amount, fromEntry.Amount)
 		require.NotZero(t, fromEntry.ID)
 		require.NotZero(t, fromEntry.CreatedAt)
 
-		_, err = store.GetEntries(context.Background(), fromEntry.ID)
+		_, err = store.GetEntries(context.Background(), fromEntry.AccountNumber)
 		require.NoError(t, err)
 
 		toEntry := result.ToEntry
 		require.NotEmpty(t, toEntry)
-		require.Equal(t, account2.ID, toEntry.AccountID)
+		require.Equal(t, account2.AccountNumber, toEntry.AccountNumber)
 		require.Equal(t, amount, toEntry.Amount)
 		require.NotZero(t, toEntry.ID)
 		require.NotZero(t, toEntry.CreatedAt)
 
-		_, err = store.GetEntries(context.Background(), toEntry.ID)
+		_, err = store.GetEntries(context.Background(), toEntry.AccountNumber)
 		require.NoError(t, err)
 
 		//check accounts
@@ -102,10 +102,10 @@ func TestTransferTx(t *testing.T) {
 	}
 
 	//check the final updated balances
-	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.AccountNumber)
 	require.NoError(t, err)
 
-	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.AccountNumber)
 	require.NoError(t, err)
 
 	fmt.Println(">>after:", updatedAccount1.Balance, updatedAccount2.Balance)
@@ -127,20 +127,20 @@ func TestTransferTxDeadlock(t *testing.T) {
 	errs := make(chan error)
 
 	for i := 0; i < n; i++ {
-		fromAccountID := account1.ID
-		toAccountID := account2.ID
+		fromAccountNumber := account1.AccountNumber
+		toAccountNumber := account2.AccountNumber
 
 		if i%2 == 1 {
-			fromAccountID = account2.ID
-			toAccountID = account1.ID
+			fromAccountNumber = account2.AccountNumber
+			toAccountNumber = account1.AccountNumber
 		}
 
 		go func() {
 			ctx := context.Background()
 			_, err := store.TransferTx(ctx, TransferTxParams{
-				FromAccountID: fromAccountID,
-				ToAccountID:   toAccountID,
-				Amount:        amount,
+				FromAccountNumber: fromAccountNumber,
+				ToAccountNumber:   toAccountNumber,
+				Amount:            amount,
 			})
 
 			errs <- err
@@ -156,10 +156,10 @@ func TestTransferTxDeadlock(t *testing.T) {
 	}
 
 	//check the final updated balances
-	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.AccountNumber)
 	require.NoError(t, err)
 
-	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.AccountNumber)
 	require.NoError(t, err)
 
 	fmt.Println(">>after:", updatedAccount1.Balance, updatedAccount2.Balance)
