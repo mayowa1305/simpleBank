@@ -1,6 +1,1 @@
 make.exe --dry-run --always-make --keep-going --print-directory
-make.exe: Entering directory 'c:/Users/admin pc/Desktop/go-workspace/src/simpleBank'
-docker run --name postgres12 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=bolu -d postgres
- 
-make.exe: Leaving directory 'c:/Users/admin pc/Desktop/go-workspace/src/simpleBank'
- 
